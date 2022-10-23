@@ -41,6 +41,11 @@ void send_message(char *message){
 		}
 	}
 
+	sbuf->msg_text = '\0';
+	printf("sbuf->msg_text: %c\n", sbuf->msg_text);
+	if(msgsnd(msgid, sbuf, sizeof(sbuf->msg_text), 0) == -1){
+		perror(strcat("msgsnd, child pid: ", pid_char));
+	}
 
 	free(sbuf);
 }

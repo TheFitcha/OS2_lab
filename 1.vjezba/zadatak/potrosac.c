@@ -35,7 +35,7 @@ void exit_program(int signal){
 void print_list(){
 	struct msg_buffer *temp = buf_head;
 	while(temp->next){
-		printf("msg_type: %d\nmsg_text: %s\n---------\n", temp->next->msg_type, temp->next->message);
+		printf("msg_type: %ld\nmsg_text: %s\n---------\n", temp->next->msg_type, temp->next->message);
 		temp = temp->next;
 	}
 }
@@ -71,7 +71,7 @@ void receive_message(){
 			temp->next = new_msg;
 		}
 
-		print_list();
+		if(temp_buf.msg_text == '\0') print_list();
 	}
 }
 
