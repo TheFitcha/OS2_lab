@@ -5,6 +5,8 @@
 #include<sys/ipc.h>
 #include<sys/msg.h>
 #include<signal.h>
+#include<stdbool.h>
+#include<string.h>
 
 #define ENV_KEY "MSG_KEY"
 
@@ -13,11 +15,12 @@ int msqid;
 
 struct msg_data{
 	long msg_type;
-	char msg_text[200];
+	char msg_text;
 };
 
 struct msg_buffer{
-	struct msg_data data;
+	long msg_type;
+	char message[200];
 	struct msg_buffer *next;
 } *buf_head;
 
@@ -29,17 +32,46 @@ void exit_program(int signal){
 	exit(0);
 }
 
+void print_list(){
+	struct msg_buffer *temp = buf_head;
+	while(temp->next){
+		printf("msg_type: %d\nmsg_text: %s\n---------\n", temp->next->msg_type, temp->next->message);
+		temp = temp->next;
+	}
+}
+
 void receive_message(){
 	struct msg_data temp_buf;
+	bool found;
 
 	for(;;){
 		printf("Receiving messages...\n");
-		if(msgrcv(msqid, (struct msg_data*)&temp_buf, sizeof(temp_buf.msg_text), 0, 0) == -1){
+		if(msgrcv(msqid, (struct msg_data*)&temp_buf, sizeof(char), 0, 0) == -1){
 			perror("msgrcv");
 			exit(1);
 		}
 
-		printf("Received msg_type: %ld\nReceived msg_text: %s\n", temp_buf.msg_type, temp_buf.msg_text);
+		printf("Received msg_type: %ld\nReceived msg_text: %c\n", temp_buf.msg_type, temp_buf.msg_text);
+
+		struct msg_buffer *temp = buf_head;
+		found = false;
+		while(temp->next){
+			if(temp->next->msg_type == temp_buf.msg_type){
+				strncat(temp->next->message, &temp_buf.msg_text, 1);
+				found = true;
+				break;
+			}
+			temp = temp->next;
+		}
+
+		if(!found){
+			struct msg_buffer *new_msg = malloc(sizeof(struct msg_buffer));
+			new_msg->msg_type = temp_buf.msg_type;
+			new_msg->message[0] = temp_buf.msg_text;
+			temp->next = new_msg;
+		}
+
+		print_list();
 	}
 }
 

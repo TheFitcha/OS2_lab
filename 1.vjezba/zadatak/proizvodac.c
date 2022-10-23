@@ -12,31 +12,37 @@
 
 key_t key;
 
-struct msg_buffer{
+struct sending_buffer{
 	long msg_type;
-	char msg_text[200];
+	char msg_text;
 };
 
-void send_message(struct msg_buffer *msgbuf){
+void send_message(char *message){
 	int msgid;
 
 	char *pid_char = malloc(sizeof(char) * 10);
 	sprintf(pid_char, "%d", getpid());
 
-	msgbuf->msg_type = getpid();
+	struct sending_buffer *sbuf = malloc(sizeof(struct sending_buffer));
+	sbuf->msg_type = getpid();
 
-	printf("Pid: %s\nSending message: %s\n", pid_char, msgbuf->msg_text);
+	printf("Pid: %s\nSending message: %s\n", pid_char, message);
 
 	if((msgid = msgget(key, 0666 | IPC_CREAT)) == -1){
 		perror(strcat("msgget, child pid: ", pid_char));
 		exit(1);
 	}
 
-	if(msgsnd(msgid, msgbuf, sizeof(msgbuf->msg_text), 0) == -1){
-		perror(strcat("msgsnd, child pid: ", pid_char));
+	for(int i = 0; i<strlen(message); i++){
+		sbuf->msg_text = message[i];
+		printf("sbuf->msg_text: %c\n", sbuf->msg_text);
+		if(msgsnd(msgid, sbuf, sizeof(sbuf->msg_text), 0) == -1){
+			perror(strcat("msgsnd, child pid: ", pid_char));
+		}
 	}
 
-	free(msgbuf);
+
+	free(sbuf);
 }
 
 int main(int argc, char **argv){
@@ -50,10 +56,10 @@ int main(int argc, char **argv){
 
 	int child_counter = 0;
 	for(int i = 1; i<argc; i++){
-		struct msg_buffer *msgbuf = malloc(sizeof(struct msg_buffer));
-		strcpy(msgbuf->msg_text, argv[i]);
+		char *message = malloc(sizeof(char)*200);
+		strcpy(message, argv[i]);
 		if(fork() == 0){
-			send_message(msgbuf);
+			send_message(message);
 			exit(0);
 		}
 		child_counter++;
