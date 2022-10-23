@@ -25,6 +25,13 @@ struct msg_buffer{
 } *buf_head;
 
 void exit_program(int signal){
+	struct msg_buffer *temp;
+	while(buf_head){
+		temp = buf_head;
+		buf_head = buf_head->next;
+		free(temp);
+	}
+
 	if(msgctl(msqid, IPC_RMID, NULL) == -1){
 		perror("msgctl");
 		exit(1);
