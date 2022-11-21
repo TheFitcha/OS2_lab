@@ -33,6 +33,19 @@ void send_message(char *message){
 		exit(1);
 	}
 
+	struct msqid_ds *queue_ds = malloc(sizeof(struct msqid_ds));
+	struct ipc_perm *perms = malloc(sizeof(struct ipc_perm));
+	perms->mode = 0600;
+	perms->uid = getuid();
+	perms->gid = getgid();
+	queue_ds->msg_perm = *perms;
+	queue_ds->msg_qbytes = 5;
+
+	if(msgctl(msgid, IPC_SET, queue_ds) == -1){
+		perror("msgctl");
+		exit(-1);
+	}
+
 	for(int i = 0; i<strlen(message); i++){
 		sbuf->msg_text = message[i];
 		printf("sbuf->msg_text: %c\n", sbuf->msg_text);

@@ -7,6 +7,7 @@
 #include<signal.h>
 #include<stdbool.h>
 #include<string.h>
+#include<unistd.h>
 
 #define ENV_KEY "MSG_KEY"
 
@@ -49,15 +50,29 @@ void print_list(){
 
 void receive_message(){
 	struct msg_data temp_buf;
-	bool found;
+	bool found, end_message = true;
+	int counter;
 
 	for(;;){
-		printf("Receiving messages...\n");
-		if(msgrcv(msqid, (struct msg_data*)&temp_buf, sizeof(char), 0, 0) == -1){
-			perror("msgrcv");
-			exit(1);
+		if(end_message){
+			counter = 1;
+			temp_buf.msg_type = -1;
+			while(counter <= 10 && temp_buf.msg_type == -1){
+				printf("Receiving messages...(%d)\n", counter);
+				msgrcv(msqid, (struct msg_data*)&temp_buf, sizeof(char), 0, IPC_NOWAIT);
+				counter++;
+				sleep(1);
+			}
+			if(counter > 10){
+				printf("msgrcv timeout... No more messages arrived!\n");
+				return;
+			}
+		}
+		else{
+			msgrcv(msqid, (struct msg_data*)&temp_buf, sizeof(char), 0, 0);
 		}
 
+		end_message = false;
 		printf("Received msg_type: %ld\nReceived msg_text: %c\n", temp_buf.msg_type, temp_buf.msg_text);
 
 		struct msg_buffer *temp = buf_head;
@@ -78,7 +93,7 @@ void receive_message(){
 			temp->next = new_msg;
 		}
 
-		if(temp_buf.msg_text == '\0') print_list();
+		if(temp_buf.msg_text == '\0') end_message = true;
 	}
 }
 
@@ -101,7 +116,8 @@ int main(int argc, char** argv){
 	}
 
 	receive_message();
+	print_list();
 
-	free(buf_head);
+	exit_program(0);
 	return 0;
 }
