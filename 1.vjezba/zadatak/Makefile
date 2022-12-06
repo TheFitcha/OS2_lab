@@ -3,4 +3,4 @@ make: proizvodac.c potrosac.c
 	gcc potrosac.c -o potrosac -g
 	gcc glavni.c -o glavni -g
 clean:
-	rm proizvodac potrosac
+	rm proizvodac potrosac glavni

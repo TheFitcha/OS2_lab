@@ -100,7 +100,7 @@ void receive_message(){
 
 int main(int argc, char** argv){
 	if(!getenv(ENV_KEY)){
-		perror("getenv");
+		perror("getenv potrosac");
 		exit(1);
 	}
 
@@ -111,7 +111,7 @@ int main(int argc, char** argv){
 
 	buf_head = malloc(sizeof(struct msg_buffer));
 	if((msqid = msgget(key, 0600 | IPC_CREAT)) == -1){
-		perror("msgget");
+		perror("msgget potrosac");
 		exit(1);
 	}
 

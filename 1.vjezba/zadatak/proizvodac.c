@@ -65,11 +65,12 @@ void send_message(char *message){
 
 int main(int argc, char **argv){
 	if(!getenv(ENV_KEY)){
-		perror(strcat("getenv err, value: ", getenv(ENV_KEY)));
+		perror(strcat("getenv proizvodac", getenv(ENV_KEY)));
 		exit(1);
 	}
 
 	key = atoi(getenv(ENV_KEY));
+	printf("Found env key: %d\n", key);
 	printf("Args number: %d\n", argc);
 
 	int child_counter = 0;

@@ -18,20 +18,25 @@ int main(int argc, char **argv){
 		return -1;
 	}
 
+
 	if(fork() == 0){
-		char *args_proc[] = {"./proizvodac", argv[1], NULL};
-		execv("./proizvodac", args_proc);
+		char **args = malloc(sizeof(char)*100*argc);
+		for(int i = 0; i<argc; i++){
+			args[i] = argv[i];
+			printf("%s\n", args[i]);
+		}
+
+		execvp("./proizvodac", args);
 	}
 
 	if(fork() == 0){
-		char *args_proc[] = {"./potrosac", NULL};
-		execv("./potrosac", args_proc);
+		execvp("./potrosac", NULL);
 	}
 
 	wait(NULL);
 	wait(NULL);
 
-	if(unsetenv(ENV_KEY) <= 1){
+	if(unsetenv(ENV_KEY) != 0){
 		perror("unsetenv");
 		return -1;
 	}
