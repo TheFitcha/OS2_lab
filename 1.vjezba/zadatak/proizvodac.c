@@ -26,7 +26,7 @@ void send_message(char *message){
 	struct sending_buffer *sbuf = malloc(sizeof(struct sending_buffer));
 	sbuf->msg_type = getpid();
 
-	printf("Pid: %s\nSending message: %s\n", pid_char, message);
+	printf("Proizvodac pid: %s\n", pid_char);
 
 	if((msgid = msgget(key, 0666 | IPC_CREAT)) == -1){
 		perror(strcat("msgget, child pid: ", pid_char));
@@ -48,17 +48,17 @@ void send_message(char *message){
 
 	for(int i = 0; i<strlen(message); i++){
 		sbuf->msg_text = message[i];
-		printf("sbuf->msg_text: %c\n", sbuf->msg_text);
 		if(msgsnd(msgid, sbuf, sizeof(sbuf->msg_text), 0) == -1){
 			perror(strcat("msgsnd, child pid: ", pid_char));
 		}
 	}
 
 	sbuf->msg_text = '\0';
-	printf("sbuf->msg_text: %c\n", sbuf->msg_text);
 	if(msgsnd(msgid, sbuf, sizeof(sbuf->msg_text), 0) == -1){
 		perror(strcat("msgsnd, child pid: ", pid_char));
 	}
+
+	printf("[Proizvodac] (pid=%s) zavrsio s radom!\n", pid_char);
 
 	free(sbuf);
 }
@@ -70,8 +70,7 @@ int main(int argc, char **argv){
 	}
 
 	key = atoi(getenv(ENV_KEY));
-	printf("Found env key: %d\n", key);
-	printf("Args number: %d\n", argc);
+	printf("[Proizvodac] Nasao varijablu okoline: %d\n", key);
 
 	int child_counter = 0;
 	for(int i = 1; i<argc; i++){

@@ -42,8 +42,9 @@ void exit_program(int signal){
 
 void print_list(){
 	struct msg_buffer *temp = buf_head;
+	printf("---------\n");
 	while(temp->next){
-		printf("msg_type: %ld\nmsg_text: %s\n---------\n", temp->next->msg_type, temp->next->message);
+		printf("pid: %ld\nporuka: %s\n---------\n", temp->next->msg_type, temp->next->message);
 		temp = temp->next;
 	}
 }
@@ -58,13 +59,13 @@ void receive_message(){
 			counter = 1;
 			temp_buf.msg_type = -1;
 			while(counter <= 10 && temp_buf.msg_type == -1){
-				printf("Receiving messages...(%d)\n", counter);
+				printf("[Potrosac] Cekam...(%d)\n", counter);
 				msgrcv(msqid, (struct msg_data*)&temp_buf, sizeof(char), 0, IPC_NOWAIT);
 				counter++;
 				sleep(1);
 			}
 			if(counter > 10){
-				printf("msgrcv timeout... No more messages arrived!\n");
+				printf("[Potrosac] zavrsio s radom!\n");
 				return;
 			}
 		}
@@ -73,7 +74,7 @@ void receive_message(){
 		}
 
 		end_message = false;
-		printf("Received msg_type: %ld\nReceived msg_text: %c\n", temp_buf.msg_type, temp_buf.msg_text);
+		printf("[Potrosac] primio: %c od pid: %ld\n", temp_buf.msg_text, temp_buf.msg_type);
 
 		struct msg_buffer *temp = buf_head;
 		found = false;
@@ -105,7 +106,7 @@ int main(int argc, char** argv){
 	}
 
 	key = atoi(getenv(ENV_KEY));
-	printf("Queue key: %d\n", key);
+	printf("[Potrosac] Nasao varijablu okoline: %d\n", key);
 
 	sigset(SIGINT, exit_program);
 
