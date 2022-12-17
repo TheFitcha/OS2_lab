@@ -13,7 +13,10 @@ int main(int argc, char **argv){
 		return 0;
 	}
 
-	if(setenv(ENV_KEY, "12345", 1) != 0){
+	char *uid_char = malloc(sizeof(char)*10);
+	sprintf(uid_char, "%d", getuid());
+
+	if(setenv(ENV_KEY, uid_char, 1) != 0){
 		perror("setenv");
 		return -1;
 	}
