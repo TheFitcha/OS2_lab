@@ -7,8 +7,10 @@
 #include<string.h>
 #include<wait.h>
 
+#define TASKS_FILE "tasks.txt"
+
 int main(int argc, char **argv){
-	FILE *tasks = fopen("foo", "r");
+	FILE *tasks = fopen(TASKS_FILE, "r");
 
 	int inPipe[2], outPipe[2];
 	if(pipe(inPipe) < 0){
